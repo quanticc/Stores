@@ -55,7 +55,22 @@ allprojects {
         }
     }
 
-    javadoc.options.encoding = 'UTF-8'
+    tasks.withType(Javadoc) {
+        options.encoding = 'UTF-8'
+        options.addStringOption('encoding', 'UTF-8')
+        options.tags = ["apiNote:a:API Note:",
+                        "implSpec:a:Implementation Requirements:",
+                        "implNote:a:Implementation Note:"]
+        options.windowTitle = "$rootProject.name ($version)"
+        options.links = [
+            "https://docs.oracle.com/javase/8/docs/api/",
+            "https://docs.oracle.com/javaee/7/api/",
+            "http://www.reactive-streams.org/reactive-streams-1.0.2-javadoc/",
+            "http://projectreactor.io/docs/core/snapshot/api/",
+//            "http://www.javadoc.io/doc/net.openhft/chronicle-map/3.14.5",
+//            "https://lettuce.io/core/release/api/"
+        ]
+    }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
@@ -125,9 +140,31 @@ subprojects {
     }
 }
 
+task aggregateJavadoc(type: Javadoc,
+    description: "Generate javadocs from all child projects as if it was a single project",
+    group: JavaBasePlugin.DOCUMENTATION_GROUP) {
+
+    destinationDir file("build/docs/aggregateJavadoc")
+
+    subprojects.each { project ->
+        project.tasks.withType(Javadoc.class).each { doc ->
+            source += doc.source
+            classpath += doc.classpath
+            excludes += doc.excludes
+            includes += doc.includes
+        }
+    }
+}
+
+task aggregateJavadocJar(type: Jar, dependsOn: aggregateJavadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/aggregateJavadoc'
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
+            artifact aggregateJavadocJar
         }
     }
 }
