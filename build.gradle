@@ -72,10 +72,10 @@ allprojects {
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
-                "https://docs.oracle.com/javase/8/docs/api/",
-                "https://docs.oracle.com/javaee/7/api/",
-                "http://www.reactive-streams.org/reactive-streams-1.0.2-javadoc/",
-                "https://projectreactor.io/docs/core/release/api/",
+                    "https://docs.oracle.com/javase/8/docs/api/",
+                    "https://docs.oracle.com/javaee/7/api/",
+                    "http://www.reactive-streams.org/reactive-streams-1.0.2-javadoc/",
+                    "https://projectreactor.io/docs/core/release/api/",
             ]
         }
     }
@@ -109,6 +109,11 @@ allprojects {
 
     if (!isJitpack && isRelease) {
         signing {
+            def signingKey = findProperty("signingKey")
+            def signingPassword = findProperty("signingPassword")
+            if (signingKey != null && signingPassword != null) {
+                useInMemoryPgpKeys(signingKey as String, signingPassword as String)
+            }
             sign configurations.archives
         }
     }
@@ -169,10 +174,12 @@ subprojects {
                     } else {
                         url 'https://oss.sonatype.org/content/repositories/snapshots/'
                     }
-                    if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                    def sonatypeUsername = findProperty('sonatypeUsername')
+                    def sonatypePassword = findProperty('sonatypePassword')
+                    if (sonatypeUsername != null && sonatypePassword != null) {
                         credentials {
-                            username project.property('sonatypeUsername')
-                            password project.property('sonatypePassword')
+                            username sonatypeUsername
+                            password sonatypePassword
                         }
                     }
                 }
@@ -242,6 +249,9 @@ release {
     preTagCommitMessage = 'Release version'
     tagCommitMessage = 'Release version'
     newVersionCommitMessage = 'Next development version'
+    git {
+        requireBranch = ''
+    }
 }
 
 afterReleaseBuild.dependsOn publish
