@@ -42,6 +42,7 @@ workflows:
           context: D3J
           requires:
             - build-jdk8
+            - build-jdk11
           filters:
             tags:
               only: /.*/
@@ -114,6 +115,10 @@ commands:
     description: "Publish artifacts"
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            - gradle-wrapper
       - restore_cache:
           keys:
             - gradle-build-{{ .Environment.cacheVersion }}-{{ .Revision }}

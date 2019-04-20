@@ -112,7 +112,7 @@ allprojects {
             def signingKey = findProperty("signingKey")
             def signingPassword = findProperty("signingPassword")
             if (signingKey != null && signingPassword != null) {
-                useInMemoryPgpKeys(signingKey as String, signingPassword as String)
+                useInMemoryPgpKeys(new String(signingKey.decodeBase64()), signingPassword as String)
             }
             sign configurations.archives
         }
