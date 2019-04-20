@@ -254,8 +254,6 @@ release {
     }
 }
 
-afterReleaseBuild.dependsOn publish
-
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
